@@ -34,7 +34,7 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'required|exists:categories,id',    
             'brand_id' => 'required|exists:brands,id',
             // অন্যান্য ভ্যালিডেশন...
         ]);
