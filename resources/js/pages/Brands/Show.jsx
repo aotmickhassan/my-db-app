@@ -1,9 +1,10 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 
 export default function Show({ brand }) {
     function handleDelete() {
-        if (confirm('এই Brand টি delete করতে চান?')) {
+        if (confirm('Are you sure you want to delete this brand?')) {
             router.delete(route('brands.destroy', brand.id));
         }
     }
@@ -13,27 +14,26 @@ export default function Show({ brand }) {
             <Head title={`Brand — ${brand.name}`} />
 
             <div className="p-6">
-
                 {/* Page Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="mb-6 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                             🏷️ Brand Details
                         </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Brand এর বিস্তারিত তথ্য
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            View brand information and details
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Link
                             href={route('brands.edit', brand.id)}
-                            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-200"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-indigo-700"
                         >
-                            ✏️ Edit
+                            Edit
                         </Link>
                         <button
                             onClick={handleDelete}
-                            className="inline-flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors duration-200 border-0 cursor-pointer"
+                            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border-0 bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-red-600"
                         >
                             🗑️ Delete
                         </button>
@@ -41,93 +41,113 @@ export default function Show({ brand }) {
                 </div>
 
                 {/* Detail Card */}
-                <div className="max-w-lg bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-
+                <div className="max-w-lg overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
                     {/* Brand Image Banner */}
                     {brand.image && (
-                        <div className="h-40 bg-gray-50 dark:bg-gray-800 flex items-center justify-center border-b border-gray-100 dark:border-gray-800">
+                        <div className="flex h-40 items-center justify-center border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800">
                             <img
-                                src={brand.image}
+                                src={
+                                    brand.image.startsWith('http')
+                                        ? brand.image
+                                        : `/storage/${brand.image}`
+                                }
                                 alt={brand.name}
-                                className="h-32 w-32 object-contain rounded-xl"
-                                onError={e => e.target.style.display = 'none'}
+                                className="h-32 w-32 rounded-xl object-contain"
+                                onError={(e) => (e.target.style.display = 'none')}
                             />
                         </div>
                     )}
 
                     {/* Info Rows */}
                     <div className="divide-y divide-gray-100 dark:divide-gray-800">
-
-                        {/* ID */}
                         <div className="flex items-center px-6 py-4">
-                            <span className="w-32 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">ID</span>
-                            <span className="text-sm font-mono text-gray-600 dark:text-gray-400">#{brand.id}</span>
+                            <span className="w-32 text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                ID
+                            </span>
+                            <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
+                                #{brand.id}
+                            </span>
                         </div>
 
-                        {/* Name */}
                         <div className="flex items-center px-6 py-4">
-                            <span className="w-32 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Name</span>
-                            <span className="text-base font-semibold text-gray-800 dark:text-gray-200">{brand.name}</span>
+                            <span className="w-32 text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                Name
+                            </span>
+                            <span className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                                {brand.name}
+                            </span>
                         </div>
 
-                        {/* Image URL */}
                         <div className="flex items-start px-6 py-4">
-                            <span className="w-32 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-0.5">Image</span>
+                            <span className="mt-0.5 w-32 text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                Image
+                            </span>
                             {brand.image ? (
                                 <a
-                                    href={brand.image}
+                                    href={
+                                        brand.image.startsWith('http')
+                                            ? brand.image
+                                            : `/storage/${brand.image}`
+                                    }
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-sm text-indigo-600 hover:underline dark:text-indigo-400 break-all"
+                                    className="break-all text-sm text-indigo-600 hover:underline dark:text-indigo-400"
                                 >
                                     {brand.image}
                                 </a>
                             ) : (
-                                <span className="text-sm text-gray-400 italic">No image</span>
+                                <span className="text-sm italic text-gray-400">No image</span>
                             )}
                         </div>
 
-                        {/* Status */}
                         <div className="flex items-center px-6 py-4">
-                            <span className="w-32 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Status</span>
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
-                                brand.status
-                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                    : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                            }`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${brand.status ? 'bg-green-500' : 'bg-red-500'}`} />
+                            <span className="w-32 text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                Status
+                            </span>
+                            <span
+                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                                    brand.status
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                        : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                                }`}
+                            >
+                                <span
+                                    className={`h-1.5 w-1.5 rounded-full ${
+                                        brand.status ? 'bg-green-500' : 'bg-red-500'
+                                    }`}
+                                />
                                 {brand.status ? 'Active' : 'Inactive'}
                             </span>
                         </div>
 
-                        {/* Products count */}
                         {brand.products && (
                             <div className="flex items-center px-6 py-4">
-                                <span className="w-32 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Products</span>
+                                <span className="w-32 text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                    Products
+                                </span>
                                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                    {brand.products.length} টি product
+                                    {brand.products.length} products
                                 </span>
                             </div>
                         )}
 
-                        {/* Created At */}
                         <div className="flex items-center px-6 py-4">
-                            <span className="w-32 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Created</span>
+                            <span className="w-32 text-xs font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                Created
+                            </span>
                             <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {new Date(brand.created_at).toLocaleDateString('bn-BD', {
-                                    year: 'numeric', month: 'long', day: 'numeric'
-                                })}
+                                {new Date(brand.created_at).toLocaleDateString()}
                             </span>
                         </div>
                     </div>
 
                     {/* Footer */}
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+                    <div className="border-t border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-800/50">
                         <Link
                             href={route('brands.index')}
-                            className="text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 font-semibold"
+                            className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
                         >
-                            ← সব Brand দেখুন
+                            &larr; Back to Brands
                         </Link>
                     </div>
                 </div>
@@ -142,4 +162,3 @@ Show.layout = {
         { title: 'Details', href: '#' },
     ],
 };
-

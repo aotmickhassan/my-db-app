@@ -2,68 +2,104 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Image;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Image;
-use Inertia\Inertia;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class ImageController extends Controller
 {
-    public function index()
+    /**
+     * Show the uploaded images gallery.
+     */
+    public function index(): View
     {
-        $images = Image::latest()->get()->map(function ($image) {
-            return [
-                'id' => $image->id,
-                'original_name' => $image->original_name,
-                'url' => Storage::url($image->path),
-                'mime_type' => $image->mime_type,
-                'size' => $image->size,
-                'created_at' => $image->created_at,
-            ];
-        });
-
-        return Inertia::render('Images/Index', [
-            'images' => $images,
-        ]);
+        return $this->list();
     }
-    function upload(Request $request){
-        // $path=$request->file("file")->store('images', 'public');
-        // $pathArray=explode("/",$path);
-        // $imgPath= $pathArray[1];
-        // $image=new Image();
-        // $image->path=$imgPath;
-        // if  ($image->save()){
-        //     return redirect()->route('upload.list');
-        // };
-        
+
+    /**
+     * Show the image upload form.
+     */
+    public function create(): View
+    {
+        return view('upload');
+    }
+
+    /**
+     * Store an uploaded image with a user-specified custom name into storage/app/public/images
+     * (accessible publicly via public/storage/images).
+     */
+    public function upload(Request $request): RedirectResponse
+    {
         $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+            ],
             'file' => [
                 'required',
+                'file',
                 'image',
-                'mimes:jpg,jpeg,png,gif,webp',
-                'max:2048',
+                'mimes:jpg,jpeg,png,gif,webp,avif,svg,bmp',
+                'max:20480', // 20MB max
             ],
         ]);
 
         $file = $validated['file'];
+        $extension = $file->getClientOriginalExtension();
 
-        // Store image inside storage/app/public/images
-        $path = $file->store('images', 'public');
+        // Convert user's entered name to safe filename format (e.g. "summer-beach-photo.jpg")
+        $cleanName = Str::slug($validated['name']);
+        $filename = $cleanName . '.' . $extension;
 
-        // Save image information in database
+        // If a file already exists with this name, append timestamp to keep both safe
+        if (Storage::disk('public')->exists('images/' . $filename)) {
+            $filename = $cleanName . '-' . time() . '.' . $extension;
+        }
+
+        // Store file with custom name inside storage/app/public/images/
+        $path = $file->storeAs('images', $filename, 'public');
+
+        // Save path in the database
         Image::create([
-            'original_name' => $file->getClientOriginalName(),
             'path' => $path,
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
         ]);
 
         return redirect()
-            ->route('images.index')
-            ->with('success', 'Image uploaded successfully!');
+            ->route('upload.list')
+            ->with('success', 'Image saved as "' . $filename . '" successfully!');
     }
-    function list(){
-        $imageData=Image::all();
-        return view("display", compact('imageData') );
+
+    /**
+     * List all stored images.
+     */
+    public function list(): View
+    {
+        $imageData = Image::latest()->get();
+
+        return view('display', compact('imageData'));
+    }
+
+    /**
+     * Delete an image from public storage and database.
+     */
+    public function destroy(Image $image): RedirectResponse
+    {
+        $relativePath = str_starts_with($image->path, 'images/')
+            ? $image->path
+            : 'images/' . $image->path;
+
+        if (Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->delete($relativePath);
+        }
+
+        $image->delete();
+
+        return redirect()
+            ->route('upload.list')
+            ->with('success', 'Image deleted successfully!');
     }
 }

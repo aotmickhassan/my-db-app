@@ -47,13 +47,13 @@ class BrandController extends Controller
             'status' => 'required|boolean',
         ]);
 
-        // $validated['user_id'] = auth()->id() ?? 1;
+        $validated['user_id'] = auth()->id() ?? 1;
 
         Brand::create($validated);
 
         return redirect()
             ->route('brands.index')
-            ->with('success', 'Brand সফলভাবে তৈরি হয়েছে!');
+            ->with('success', 'Brand created successfully!');
     }
 
     /**
@@ -97,7 +97,7 @@ class BrandController extends Controller
 
         return redirect()
             ->route('brands.index')
-            ->with('success', 'Brand সফলভাবে আপডেট হয়েছে!');
+            ->with('success', 'Brand updated successfully!');
     }
 
     /**
@@ -111,6 +111,6 @@ class BrandController extends Controller
 
         return redirect()
             ->route('brands.index')
-            ->with('success', 'Brand সফলভাবে মুছে ফেলা হয়েছে!');
+            ->with('success', 'Brand deleted successfully!');
     }
 }

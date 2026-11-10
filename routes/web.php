@@ -14,11 +14,17 @@ Route::view('/upload', 'upload')->name('upload.view');
 Route::post("/upload",[ImageController::class,'upload'])->name('upload.post');
 Route::get('/list',[ImageController::class,'list'])->name('upload.list');
 
+// Aliases for /images/upload and /images/list
+Route::view('/images/upload', 'upload');
+Route::post("/images/upload",[ImageController::class,'upload']);
+Route::get('/images/list',[ImageController::class,'list']);
+Route::delete('/images/{image}', [ImageController::class, 'destroy'])->name('images.destroy');
+
 Route::get('/products', [ProductController::class, 'index'])
     ->name('products.index');
 
 // Brand Routes
-Route::resource('brands', BrandController::class);
+Route::resource('brands', BrandController::class)->names('brands');
 
 Route::prefix('{current_team}')
 ->middleware(['auth', 'verified', EnsureTeamMembership::class])
